@@ -38,7 +38,6 @@ let betweenUnderscores = try! NSRegularExpression(pattern: "_[^_]+_", options: [
 struct ContentView: View {
     
     @State private var model = HighlightedTextModel()
-    @State private var text: String = ""
     
     private let rules: [HighlightRule] = [
         HighlightRule(pattern: betweenUnderscores, formattingRules: [
@@ -55,7 +54,7 @@ struct ContentView: View {
         VStack {
             HighlightedTextEditorObservable(model: model, highlightRules: rules)
                 // optional modifiers
-                .onCommit { print("Commited \(model.characters) characters.") }
+                .onCommit { print("Committed \(model.characters) characters with text: \(model.text)") }
                 .onEditingChanged { print("editing changed") }
                 .onTextChange { print("latest text value", $0) }
                 .onSelectionChange { (range: NSRange) in
@@ -98,7 +97,7 @@ struct ContentView: View {
         VStack {
             HighlightedTextEditor(text: $text, highlightRules: rules)
                 // optional modifiers
-                .onCommit { print("commited") }
+                .onCommit { print("committed") }
                 .onEditingChanged { print("editing changed") }
                 .onTextChange { print("latest text value", $0) }
                 .onSelectionChange { (range: NSRange) in
@@ -113,7 +112,8 @@ struct ContentView: View {
 }
 ```
 
-Notice the NSRegularExpression is instantiated **once**. It should not be recreated every time the view is redrawn. This [helps performance](https://stackoverflow.com/questions/41705728/optimize-nsregularexpression-performance). 
+> [!IMPORTANT]
+> Notice the NSRegularExpression is instantiated **once**. It should not be recreated every time the view is redrawn. This [helps performance](https://stackoverflow.com/questions/41705728/optimize-nsregularexpression-performance). 
 
 ## Presets
 
@@ -151,7 +151,7 @@ HighlightedTextEditor(text: $text, highlightRules: [
 | `text` | Binding&lt;String\> | Text content of the field |
 | `highlightRules` | [HighlightRule] | Patterns and formatting for those patterns |
 
-### HighlightedTextEditorObservable (iOS 17+, macoS 14+)
+### HighlightedTextEditorObservable (iOS 17+, macOS 14+)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
