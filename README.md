@@ -20,6 +20,57 @@ Add `pod 'HighlightedTextEditor'` to your `Podfile` and run `pod install`.
 
 ## Usage
 
+### iOS 17.0+, macOS 14.0+
+HighlightedTextEditor applies styles to text matching regex patterns you provide. You can apply multiple styles to each regex pattern, as shown in the example below. 
+
+> [!TIP]
+> If your project's deployment target is set to iOS 17.0+ and / or macOS 14.0+, use the more performant `HighlightedTextEditorObservable` component as demonstrated below. This updated component uses [Swift Observation](https://developer.apple.com/documentation/Observation) to reduce the number of redraws SwiftUI performs on each keystroke.
+>
+> At this time, because the library supports deployment targets as low as iOS 13.0 and Mac OS X 10.15, you'll need to ensure you use the component with the `Observable` suffix.
+
+
+```swift
+import HighlightedTextEditor
+
+// matches text between underscores
+let betweenUnderscores = try! NSRegularExpression(pattern: "_[^_]+_", options: [])
+
+struct ContentView: View {
+    
+    @State private var model = HighlightedTextModel()
+    @State private var text: String = ""
+    
+    private let rules: [HighlightRule] = [
+        HighlightRule(pattern: betweenUnderscores, formattingRules: [
+            TextFormattingRule(fontTraits: [.traitItalic, .traitBold]),
+            TextFormattingRule(key: .foregroundColor, value: UIColor.red),
+            TextFormattingRule(key: .underlineStyle) { content, range in
+                if content.count > 10 { return NSUnderlineStyle.double.rawValue }
+                else { return NSUnderlineStyle.single.rawValue }
+            }
+        ])
+    ]
+    
+    var body: some View {
+        VStack {
+            HighlightedTextEditorObservable(model: model, highlightRules: rules)
+                // optional modifiers
+                .onCommit { print("Commited \(model.characters) characters.") }
+                .onEditingChanged { print("editing changed") }
+                .onTextChange { print("latest text value", $0) }
+                .onSelectionChange { (range: NSRange) in
+                    print(range)
+                }
+                .introspect { editor in
+                    // access underlying UITextView or NSTextView
+                    editor.textView.backgroundColor = .green
+                }
+        }
+    }
+}
+```
+
+### iOS 13.0+, Mac OS X 10.15+
 HighlightedTextEditor applies styles to text matching regex patterns you provide. You can apply multiple styles to each regex pattern, as shown in the example below. 
 
 ```swift
@@ -100,6 +151,14 @@ HighlightedTextEditor(text: $text, highlightRules: [
 | `text` | Binding&lt;String\> | Text content of the field |
 | `highlightRules` | [HighlightRule] | Patterns and formatting for those patterns |
 
+### HighlightedTextEditorObservable (iOS 17+, macoS 14+)
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `model` | `HighlightedTextModel` | An Observable class which contains text content and character counts |
+| `highlightRules` | [HighlightRule] | Patterns and formatting for those patterns |
+
+
 #### Modifiers
 
 - `.introspect(callback: (_ editor: HighlightedTextEditorInternals) -> Void)`: Allows you the developer to access the underlying UIKit or AppKit objects used by HighlightedTextEditor
@@ -159,8 +218,6 @@ If you are targeting iOS 14 / macOS 11, you can use a convenience initializer ta
 | `foregroundColor` | Color | Color of the text |
 | `fontTraits` | [UIFontDescriptor.SymbolicTraits](3) or [NSFontDescriptor.SymbolicTraits](4) | Text formatting attributes (e.x. `[.traitBold]` in UIKit and `.bold` in AppKit) |
 
-Apple, in its wisdom, has not enabled these features for the XCode 12 GM. If you are using the XCode beta and want to enable this initializer, go to project_name -> Targets -> specified platform -> Build Settings -> Swift Compiler - Custom Flags and add flag `-DBETA`.
-&lt;
 ## Featured apps
 
 Are you using HighlightedTextEditor in your app? I would love to feature you here! Please [open a pull request](https://github.com/kyle-n/HighlightedTextEditor/pulls) that adds a new bullet to the list below with your app's name and a link to its TestFlight or App Store page.

@@ -1,25 +1,23 @@
-#if os(iOS)
+#if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
 //
-//  HighlightedTextEditor.UIKit.swift
+//  HTEObservable.UIKit.swift
 //  HighlightedTextEditor
 //
-//  Created by Kyle Nazario on 5/26/21.
+//  Created by Sam Spencer on 1/31/25.
 //
 
+import Observation
 import SwiftUI
 import UIKit
 
-public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor {
+@available(iOS 17.0, *)
+public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
+    
+    var model: HighlightedTextModel
     
     public struct Internals {
         public let textView: SystemTextView
         public let scrollView: SystemScrollView?
-    }
-
-    @Binding var text: String {
-        didSet {
-            onTextChange?(text)
-        }
     }
 
     let highlightRules: [HighlightRule]
@@ -28,13 +26,13 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
     private(set) var onCommit: OnCommitCallback?
     private(set) var onTextChange: OnTextChangeCallback?
     private(set) var onSelectionChange: OnSelectionChangeCallback?
-    private(set) var introspect: IntrospectCallback?
+    private(set) var introspect: IntrospectObservableCallback?
 
     public init(
-        text: Binding<String>,
+        model: HighlightedTextModel,
         highlightRules: [HighlightRule]
     ) {
-        _text = text
+        self.model = model
         self.highlightRules = highlightRules
     }
 
@@ -56,7 +54,7 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         context.coordinator.updatingUIView = true
 
         let highlightedText = HighlightedTextEditor.getHighlightedText(
-            text: text,
+            text: model.text,
             highlightRules: highlightRules
         )
 
@@ -85,11 +83,11 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
     }
 
     public final class Coordinator: NSObject, UITextViewDelegate {
-        var parent: HighlightedTextEditor
+        var parent: HighlightedTextEditorObservable
         var selectedTextRange: UITextRange?
         var updatingUIView = false
 
-        init(_ markdownEditorView: HighlightedTextEditor) {
+        init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
         }
 
@@ -97,7 +95,8 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
             // For Multistage Text Input
             guard textView.markedTextRange == nil else { return }
 
-            parent.text = textView.text
+            parent.model.text = textView.text
+            parent.model.characters = textView.text.count
             selectedTextRange = textView.selectedTextRange
         }
 
@@ -120,9 +119,10 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
     
 }
 
-public extension HighlightedTextEditor {
+@available(iOS 17.0, *)
+public extension HighlightedTextEditorObservable {
     
-    func introspect(callback: @escaping IntrospectCallback) -> Self {
+    func introspect(callback: @escaping IntrospectObservableCallback) -> Self {
         var new = self
         new.introspect = callback
         return new
