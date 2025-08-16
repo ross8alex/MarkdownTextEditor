@@ -14,6 +14,8 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     var model: HighlightedTextModel
+
+    @Binding var position: Int
     
     public struct Internals {
         public let textView: SystemTextView
@@ -98,6 +100,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
+
+        let newPosition = self.position
+        if uiView.selectedRange.location != newPosition {
+            uiView.selectedRange = NSRange(location: newPosition, length: 0)
+        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -123,6 +130,8 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             self.parent = markdownEditorView
         }
 
+        public func 
+
         public func textViewDidChange(_ textView: UITextView) {
             // For Multistage Text Input
             guard textView.markedTextRange == nil else { return }
@@ -138,6 +147,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             else { return }
             selectedTextRange = textView.selectedRange
             onSelectionChange([textView.selectedRange])
+            parent.position = textView.selectedRange.location
         }
 
         public func textViewDidBeginEditing(_ textView: UITextView) {
