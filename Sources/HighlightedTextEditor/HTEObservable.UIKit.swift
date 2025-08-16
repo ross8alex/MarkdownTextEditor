@@ -103,7 +103,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         runIntrospect(uiView)
 
         if uiView.selectedRange.location != self.position {
-            context.coordinator.isProgrammaticChange = true
             uiView.selectedRange = NSRange(location: self.position, length: 0)
         }
     }
