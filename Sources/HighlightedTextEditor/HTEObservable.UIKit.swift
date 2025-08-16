@@ -91,21 +91,19 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         uiView.attributedText = highlightedText
         context.coordinator.lastAssignedText = highlightedText
 
-        // // Update selection safely
-        // let textCount = highlightedText.length
-        // let requestedRange = context.coordinator.selectedTextRange
-        // let safeLocation = min(requestedRange.location, textCount)
-        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
-
+        // Update selection safely
+        if uiView.selectedRange.location != self.position {
+            uiView.selectedRange = NSRange(location: self.position, length: 0)
+        } else {
+            let textCount = highlightedText.length
+            let requestedRange = context.coordinator.selectedTextRange
+            let safeLocation = min(requestedRange.location, textCount)
+            let safeLength   = min(requestedRange.length, textCount - safeLocation)
+            uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
+        }
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
-
-        let newPosition = self.position
-        if uiView.selectedRange.location != newPosition {
-            uiView.selectedRange = NSRange(location: newPosition, length: 0)
-        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
