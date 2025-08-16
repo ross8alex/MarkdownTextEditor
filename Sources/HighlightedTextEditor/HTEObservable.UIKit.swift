@@ -101,6 +101,8 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             let safeLocation = min(requestedRange.location, textCount)
             let safeLength   = min(requestedRange.length, textCount - safeLocation)
             uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
+        } else {
+            uiView.selectedRange = NSRange(location: self.position, length: 0)
         }
         
         // Modifiers and introspection
