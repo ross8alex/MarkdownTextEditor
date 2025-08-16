@@ -14,8 +14,7 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     var model: HighlightedTextModel
-    @Binding var position: Int
-    @Binding var isProgrammaticChange: Bool
+    @Binding var selectedRange: NSRange?
     
     public struct Internals {
         public let textView: SystemTextView
@@ -33,13 +32,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     public init(
         model: HighlightedTextModel,
         highlightRules: [HighlightRule],
-        position: Binding<Int>,
-        isProgrammaticChange: Binding<Bool>
+        selectedRange: Binding<NSRange?>
     ) {
         self.model = model
         self.highlightRules = highlightRules
-        self._position = position
-        self._isProgrammaticChange = isProgrammaticChange
+        self._selectedRange = selectedRange
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -94,32 +91,23 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         uiView.attributedText = highlightedText
         context.coordinator.lastAssignedText = highlightedText
 
-        // Update selection safely
-        let textCount = highlightedText.length
-        let requestedRange = context.coordinator.selectedTextRange
-        let safeLocation = min(requestedRange.location, textCount)
-        let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        //uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
-        
-        // Use the binding `position` as the source of truth for the cursor
-        let newPosition = self.position
-        
-        if uiView.selectedRange.location != newPosition {
-            context.coordinator.isProgrammaticChange = true // Set a flag to prevent re-trigger
-            uiView.selectedRange = NSRange(location: newPosition, length: 0)
-        } else {
-            // If the position matches, we still need to make sure the selectedRange
-            // from the coordinator is used for other logic (like highlighting).
-            uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
-        }
+        // // Update selection safely
+        // let textCount = highlightedText.length
+        // let requestedRange = context.coordinator.selectedTextRange
+        // let safeLocation = min(requestedRange.location, textCount)
+        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
 
-        // if uiView.selectedRange.location != self.position {
-        //     uiView.selectedRange = NSRange(location: self.position, length: 0)
-        // }
+        if let selectedRange = selectedRange,
+           let start = uiView.text.utf16.index(uiView.text.utf16.startIndex, offsetBy: selectedRange.location, limitedBy: uiView.text.utf16.endIndex),
+           let end = uiView.text.utf16.index(start, offsetBy: selectedRange.length, limitedBy: uiView.text.utf16.endIndex) {
+            
+            uiView.selectedTextRange = uiView.textRange(from: uiView.textInputView.textPosition(at: start)!, to: uiView.textInputView.textPosition(at: end)!)
+        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -140,7 +128,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
-        var isProgrammaticChange = false
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
@@ -153,6 +140,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             parent.model.text = textView.text
             parent.model.characters = textView.text.count
             selectedTextRange = textView.selectedRange
+            parent.selectedRange = textView.selectedRange
         }
 
         public func textViewDidChangeSelection(_ textView: UITextView) {
@@ -162,13 +150,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             //selectedTextRange = textView.selectedRange
             onSelectionChange([textView.selectedRange])
 
-            if isProgrammaticChange {
-                isProgrammaticChange = false
-                return
-            }
-
-            selectedTextRange = textView.selectedRange
-            parent.position = textView.selectedRange.location
+            parent.selectedRange = textView.selectedRange
         }
 
         public func textViewDidBeginEditing(_ textView: UITextView) {
