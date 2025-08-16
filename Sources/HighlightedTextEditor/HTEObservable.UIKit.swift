@@ -32,10 +32,12 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
     public init(
         model: HighlightedTextModel,
-        highlightRules: [HighlightRule]
+        highlightRules: [HighlightRule],
+        position: Int
     ) {
         self.model = model
         self.highlightRules = highlightRules
+        self.position = position
     }
 
     public func makeCoordinator() -> Coordinator {
