@@ -102,11 +102,10 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
 
-        if let selectedRange = selectedRange,
-           let start = uiView.text.utf16.index(uiView.text.utf16.startIndex, offsetBy: selectedRange.location, limitedBy: uiView.text.utf16.endIndex),
-           let end = uiView.text.utf16.index(start, offsetBy: selectedRange.length, limitedBy: uiView.text.utf16.endIndex) {
-            
-            uiView.selectedTextRange = uiView.textRange(from: uiView.textInputView.textPosition(at: start)!, to: uiView.textInputView.textPosition(at: end)!)
+        if let selectedRange = selectedRange {
+            let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: selectedRange.location)!
+            let endPosition = uiView.position(from: startPosition, offset: selectedRange.length)!
+            uiView.selectedTextRange = uiView.textRange(from: startPosition, to: endPosition)
         }
     }
 
