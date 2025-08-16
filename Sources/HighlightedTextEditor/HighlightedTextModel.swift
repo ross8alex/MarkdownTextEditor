@@ -6,7 +6,6 @@
 //
 
 import Observation
-import SwiftUI
 
 /// An Observable model which stores the HighlightedTextEditor's text content, in
 /// addition to other properties such as the number of characters in the field.
@@ -22,7 +21,7 @@ import SwiftUI
 public final class HighlightedTextModel {
 
     /// The text stored in this modal and displayed in the ``HighligtedTextEditor``.
-    @Binding public var text: String
+    public var text: String
     
     /// The number of characters in ``text``.
     ///
@@ -38,16 +37,16 @@ public final class HighlightedTextModel {
     /// field and will populate the ``HighlightedTextEditor`` with the value you pass
     /// in, if any.
     ///
-    public init(text: Binding<String> = "") {
-        self._text = text
+    public init(text: String = "") {
+        self.text = text
         self.characters = text.count
     }
     
     /// Convenience function to set both the text value and update the number of
     /// characters on this model.
     ///
-    public func setInitialText(_ text: Binding<String>) {
-        self._text = text
+    public func setInitialText(_ text: String) {
+        self.text = text
         self.characters = text.count
     }
     
