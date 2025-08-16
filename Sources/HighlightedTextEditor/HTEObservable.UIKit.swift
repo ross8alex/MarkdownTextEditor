@@ -13,7 +13,7 @@ import UIKit
 @available(iOS 17.0, *)
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
-    var model: HighlightedTextModel
+    public var model: HighlightedTextModel
     
     public struct Internals {
         public let textView: SystemTextView
