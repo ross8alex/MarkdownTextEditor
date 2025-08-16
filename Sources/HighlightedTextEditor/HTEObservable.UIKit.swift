@@ -101,19 +101,19 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         runIntrospect(uiView)
     }
 
-    public func insertBold(){
-        guard let tv = makeCoordinator().textView else { return }
-        guard let range = tv.selectedTextRange else { return }
+    private func insertBold() {
+        guard let tv = textView,
+              let range = tv.selectedTextRange else { return }
 
-        // Insert **
+        // Insert the two asterisks
         tv.replace(range, withText: "**")
 
-        // Move cursor between them
+        // Move cursor back between them
         if let newPos = tv.position(from: range.start, offset: 1) {
             tv.selectedTextRange = tv.textRange(from: newPos, to: newPos)
         }
 
-        // Sync text
+        // Sync text back into SwiftUI state
         model.text = tv.text
     }
 
