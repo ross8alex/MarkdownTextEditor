@@ -94,25 +94,21 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         uiView.attributedText = highlightedText
         context.coordinator.lastAssignedText = highlightedText
 
-        if !isProgrammaticChange { 
-            // Update selection safely
-            let textCount = highlightedText.length
-            let requestedRange = context.coordinator.selectedTextRange
-            let safeLocation = min(requestedRange.location, textCount)
-            let safeLength   = min(requestedRange.length, textCount - safeLocation)
-            uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
-        } else {
-            uiView.selectedRange = NSRange(location: self.position, length: 0)
-        }
+        // Update selection safely
+        let textCount = highlightedText.length
+        let requestedRange = context.coordinator.selectedTextRange
+        let safeLocation = min(requestedRange.location, textCount)
+        let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
 
-        // if uiView.selectedRange.location != self.position {
-        //     context.coordinator.isProgrammaticChange = true
-        //     uiView.selectedRange = NSRange(location: self.position, length: 0)
-        // }
+        if uiView.selectedRange.location != self.position {
+            context.coordinator.isProgrammaticChange = true
+            uiView.selectedRange = NSRange(location: self.position, length: 0)
+        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -154,11 +150,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             else { return }
             selectedTextRange = textView.selectedRange
             onSelectionChange([textView.selectedRange])
-            
-            // if isProgrammaticChange {
-            //     isProgrammaticChange = false
-            //     return
-            // }
             
             parent.position = textView.selectedRange.location
         }
