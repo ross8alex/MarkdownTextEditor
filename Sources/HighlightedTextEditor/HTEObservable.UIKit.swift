@@ -15,7 +15,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     
     var model: HighlightedTextModel
     @Binding var position: Int
-    @Binding var isProgrammaticChange: Bool
     
     public struct Internals {
         public let textView: SystemTextView
@@ -33,13 +32,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     public init(
         model: HighlightedTextModel,
         highlightRules: [HighlightRule],
-        position: Binding<Int>,
-        isProgrammaticChange: Binding<Bool>
+        position: Binding<Int>
     ) {
         self.model = model
         self.highlightRules = highlightRules
         self._position = position
-        self._isProgrammaticChange = isProgrammaticChange
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -129,7 +126,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
-        var isProgrammaticChange = false
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
