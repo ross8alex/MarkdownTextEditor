@@ -45,6 +45,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         textView.delegate = context.coordinator
         updateTextViewModifiers(textView)
         runIntrospect(textView)
+        context.coordinator.textView = textView
 
         return textView
     }
@@ -126,7 +127,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         }
 
         // Sync text
-        parent?.text = tv.text
+        model.text = tv.text
     }
 
     public final class Coordinator: NSObject, UITextViewDelegate {
@@ -135,6 +136,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
+        var textView: UITextView?
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
