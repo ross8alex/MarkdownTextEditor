@@ -14,7 +14,7 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     var model: HighlightedTextModel
-    @Binding var position: Int = 0
+    @Binding var position: Int
     
     public struct Internals {
         public let textView: SystemTextView
