@@ -32,11 +32,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     public init(
         model: HighlightedTextModel,
         highlightRules: [HighlightRule],
-        selectedRange: NSRange
+        selectedRange: Binding<NSRange>
     ) {
         self.model = model
         self.highlightRules = highlightRules
-        self.selectedRange = selectedRange
+        self._selectedRange = selectedRange
     }
 
     public func makeCoordinator() -> Coordinator {
