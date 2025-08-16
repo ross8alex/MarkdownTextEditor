@@ -14,7 +14,6 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     var model: HighlightedTextModel
-    @Binding var selectedRange: NSRange?
     
     public struct Internals {
         public let textView: SystemTextView
@@ -31,12 +30,10 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
     public init(
         model: HighlightedTextModel,
-        highlightRules: [HighlightRule],
-        selectedRange: Binding<NSRange?>
+        highlightRules: [HighlightRule]
     ) {
         self.model = model
         self.highlightRules = highlightRules
-        self._selectedRange = selectedRange
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -91,22 +88,16 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         uiView.attributedText = highlightedText
         context.coordinator.lastAssignedText = highlightedText
 
-        // // Update selection safely
-        // let textCount = highlightedText.length
-        // let requestedRange = context.coordinator.selectedTextRange
-        // let safeLocation = min(requestedRange.location, textCount)
-        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
+        // Update selection safely
+        let textCount = highlightedText.length
+        let requestedRange = context.coordinator.selectedTextRange
+        let safeLocation = min(requestedRange.location, textCount)
+        let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
-
-        if let selectedRange = selectedRange {
-            let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: selectedRange.location)!
-            let endPosition = uiView.position(from: startPosition, offset: selectedRange.length)!
-            uiView.selectedTextRange = uiView.textRange(from: startPosition, to: endPosition)
-        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -139,17 +130,14 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             parent.model.text = textView.text
             parent.model.characters = textView.text.count
             selectedTextRange = textView.selectedRange
-            parent.selectedRange = textView.selectedRange
         }
 
         public func textViewDidChangeSelection(_ textView: UITextView) {
             guard let onSelectionChange = parent.onSelectionChange,
                   !updatingUIView
             else { return }
-            //selectedTextRange = textView.selectedRange
+            selectedTextRange = textView.selectedRange
             onSelectionChange([textView.selectedRange])
-
-            parent.selectedRange = textView.selectedRange
         }
 
         public func textViewDidBeginEditing(_ textView: UITextView) {
