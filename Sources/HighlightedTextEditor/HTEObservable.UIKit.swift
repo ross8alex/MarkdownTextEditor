@@ -45,7 +45,8 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         textView.delegate = context.coordinator
         updateTextViewModifiers(textView)
         runIntrospect(textView)
-
+        context.coordinator.textView = textView
+        
         return textView
     }
 
@@ -100,6 +101,22 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         runIntrospect(uiView)
     }
 
+    public func insertBold(){
+        guard let tv = makeCoordinator().textView else { return }
+        guard let range = tv.selectedTextRange else { return }
+
+        // Insert **
+        tv.replace(range, withText: "**")
+
+        // Move cursor between them
+        if let newPos = tv.position(from: range.start, offset: 1) {
+            tv.selectedTextRange = tv.textRange(from: newPos, to: newPos)
+        }
+
+        // Sync text
+        model.text = tv.text
+    }
+
     private func runIntrospect(_ textView: UITextView) {
         guard let introspect = introspect else { return }
         let internals = Internals(textView: textView, scrollView: nil)
@@ -118,6 +135,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
+        var textView: UITextView?
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
