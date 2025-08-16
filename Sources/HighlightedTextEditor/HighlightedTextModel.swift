@@ -21,7 +21,7 @@ import Observation
 public final class HighlightedTextModel {
 
     /// The text stored in this modal and displayed in the ``HighligtedTextEditor``.
-    public var text: String
+    @Binding public var text: String
     
     /// The number of characters in ``text``.
     ///
@@ -37,16 +37,16 @@ public final class HighlightedTextModel {
     /// field and will populate the ``HighlightedTextEditor`` with the value you pass
     /// in, if any.
     ///
-    public init(text: String = "") {
-        self.text = text
+    public init(text: Binding<String> = "") {
+        self._text = text
         self.characters = text.count
     }
     
     /// Convenience function to set both the text value and update the number of
     /// characters on this model.
     ///
-    public func setInitialText(_ text: String) {
-        self.text = text
+    public func setInitialText(_ text: Binding<String>) {
+        self._text = text
         self.characters = text.count
     }
     
