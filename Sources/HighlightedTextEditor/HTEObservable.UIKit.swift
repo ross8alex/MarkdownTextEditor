@@ -15,6 +15,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     
     var model: HighlightedTextModel
     @Binding var position: Int
+    @Binding var isProgrammaticChange: Bool
     
     public struct Internals {
         public let textView: SystemTextView
@@ -32,11 +33,13 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     public init(
         model: HighlightedTextModel,
         highlightRules: [HighlightRule],
-        position: Binding<Int>
+        position: Binding<Int>,
+        isProgrammaticChange: Binding<Bool>
     ) {
         self.model = model
         self.highlightRules = highlightRules
         self._position = position
+        self._isProgrammaticChange = isProgrammaticChange
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -91,21 +94,23 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         uiView.attributedText = highlightedText
         context.coordinator.lastAssignedText = highlightedText
 
-        // Update selection safely
-        // let textCount = highlightedText.length
-        // let requestedRange = context.coordinator.selectedTextRange
-        // let safeLocation = min(requestedRange.location, textCount)
-        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
+        if !isProgrammaticChange { 
+            // Update selection safely
+            let textCount = highlightedText.length
+            let requestedRange = context.coordinator.selectedTextRange
+            let safeLocation = min(requestedRange.location, textCount)
+            let safeLength   = min(requestedRange.length, textCount - safeLocation)
+            uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
+        }
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
 
-        if uiView.selectedRange.location != self.position {
-            context.coordinator.isProgrammaticChange = true
-            uiView.selectedRange = NSRange(location: self.position, length: 0)
-        }
+        // if uiView.selectedRange.location != self.position {
+        //     context.coordinator.isProgrammaticChange = true
+        //     uiView.selectedRange = NSRange(location: self.position, length: 0)
+        // }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -142,16 +147,16 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         }
 
         public func textViewDidChangeSelection(_ textView: UITextView) {
-            // guard let onSelectionChange = parent.onSelectionChange,
-            //       !updatingUIView
-            // else { return }
-            // selectedTextRange = textView.selectedRange
-            // onSelectionChange([textView.selectedRange])
+            guard let onSelectionChange = parent.onSelectionChange,
+                  !updatingUIView
+            else { return }
+            selectedTextRange = textView.selectedRange
+            onSelectionChange([textView.selectedRange])
             
-            if isProgrammaticChange {
-                isProgrammaticChange = false
-                return
-            }
+            // if isProgrammaticChange {
+            //     isProgrammaticChange = false
+            //     return
+            // }
             
             parent.position = textView.selectedRange.location
         }
