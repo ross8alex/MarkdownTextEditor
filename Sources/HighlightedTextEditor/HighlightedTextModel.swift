@@ -6,6 +6,7 @@
 //
 
 import Observation
+import SwiftUI
 
 /// An Observable model which stores the HighlightedTextEditor's text content, in
 /// addition to other properties such as the number of characters in the field.
