@@ -92,11 +92,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         context.coordinator.lastAssignedText = highlightedText
 
         // Update selection safely
-        let textCount = highlightedText.length
-        let requestedRange = context.coordinator.selectedTextRange
-        let safeLocation = min(requestedRange.location, textCount)
-        let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
+        // let textCount = highlightedText.length
+        // let requestedRange = context.coordinator.selectedTextRange
+        // let safeLocation = min(requestedRange.location, textCount)
+        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
