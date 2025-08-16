@@ -36,7 +36,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     ) {
         self.model = model
         self.highlightRules = highlightRules
-        self._selectedRange = selectedRange
+        self.selectedRange = selectedRange
     }
 
     public func makeCoordinator() -> Coordinator {
