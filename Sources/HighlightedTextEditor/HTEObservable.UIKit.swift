@@ -113,7 +113,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     }
 
     // Public API to insert `**` at cursor and move inside
-    func insertBold() {
+    public func insertBold() {
         guard let tv = makeCoordinator().textView else { return }
         guard let range = tv.selectedTextRange else { return }
 
