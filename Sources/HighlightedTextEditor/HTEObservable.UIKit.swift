@@ -45,7 +45,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         textView.delegate = context.coordinator
         updateTextViewModifiers(textView)
         runIntrospect(textView)
-        context.coordinator.textView = textView
 
         return textView
     }
@@ -90,11 +89,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         context.coordinator.lastAssignedText = highlightedText
 
         // Update selection safely
-        // let textCount = highlightedText.length
-        // let requestedRange = context.coordinator.selectedTextRange
-        // let safeLocation = min(requestedRange.location, textCount)
-        // let safeLength   = min(requestedRange.length, textCount - safeLocation)
-        // uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
+        let textCount = highlightedText.length
+        let requestedRange = context.coordinator.selectedTextRange
+        let safeLocation = min(requestedRange.location, textCount)
+        let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        uiView.selectedRange = NSRange(location: safeLocation, length: safeLength) 
         
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
@@ -113,30 +112,12 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         textInputTraits?.setValue(textView.tintColor, forKey: "insertionPointColor")
     }
 
-    // Public API to insert `**` at cursor and move inside
-    public func insertBold() {
-        guard let tv = makeCoordinator().textView else { return }
-        guard let range = tv.selectedTextRange else { return }
-
-        // Insert **
-        tv.replace(range, withText: "**")
-
-        // Move cursor between them
-        if let newPos = tv.position(from: range.start, offset: 1) {
-            tv.selectedTextRange = tv.textRange(from: newPos, to: newPos)
-        }
-
-        // Sync text
-        model.text = tv.text
-    }
-
     public final class Coordinator: NSObject, UITextViewDelegate {
         
         var parent: HighlightedTextEditorObservable
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
-        var textView: UITextView?
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
@@ -148,14 +129,14 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
             parent.model.text = textView.text
             parent.model.characters = textView.text.count
-            //selectedTextRange = textView.selectedRange
+            selectedTextRange = textView.selectedRange
         }
 
         public func textViewDidChangeSelection(_ textView: UITextView) {
             guard let onSelectionChange = parent.onSelectionChange,
                   !updatingUIView
             else { return }
-            //selectedTextRange = textView.selectedRange
+            selectedTextRange = textView.selectedRange
             onSelectionChange([textView.selectedRange])
         }
 
