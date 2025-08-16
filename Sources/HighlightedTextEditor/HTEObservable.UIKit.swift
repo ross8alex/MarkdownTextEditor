@@ -92,18 +92,20 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         context.coordinator.lastAssignedText = highlightedText
 
         // Update selection safely
-        if uiView.selectedRange.location != self.position {
-            uiView.selectedRange = NSRange(location: self.position, length: 0)
-        } else {
-            let textCount = highlightedText.length
-            let requestedRange = context.coordinator.selectedTextRange
-            let safeLocation = min(requestedRange.location, textCount)
-            let safeLength   = min(requestedRange.length, textCount - safeLocation)
-            uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
-        }
+        let textCount = highlightedText.length
+        let requestedRange = context.coordinator.selectedTextRange
+        let safeLocation = min(requestedRange.location, textCount)
+        let safeLength   = min(requestedRange.length, textCount - safeLocation)
+        uiView.selectedRange = NSRange(location: safeLocation, length: safeLength)
+        
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
+
+        if uiView.selectedRange.location != self.position {
+            context.coordinator.isProgrammaticChange = true
+            uiView.selectedRange = NSRange(location: self.position, length: 0)
+        }
     }
 
     private func runIntrospect(_ textView: UITextView) {
@@ -124,6 +126,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var selectedTextRange: NSRange = .init(location: 0, length: 0)
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
+        var isProgrammaticChange = false
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
@@ -144,6 +147,12 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             // else { return }
             // selectedTextRange = textView.selectedRange
             // onSelectionChange([textView.selectedRange])
+            
+            if isProgrammaticChange {
+                isProgrammaticChange = false
+                return
+            }
+            
             parent.position = textView.selectedRange.location
         }
 
