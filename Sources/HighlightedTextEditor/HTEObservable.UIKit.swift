@@ -130,8 +130,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             self.parent = markdownEditorView
         }
 
-        public func 
-
         public func textViewDidChange(_ textView: UITextView) {
             // For Multistage Text Input
             guard textView.markedTextRange == nil else { return }
