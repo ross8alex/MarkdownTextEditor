@@ -141,11 +141,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         }
 
         public func textViewDidChangeSelection(_ textView: UITextView) {
-            guard let onSelectionChange = parent.onSelectionChange,
-                  !updatingUIView
-            else { return }
-            selectedTextRange = textView.selectedRange
-            onSelectionChange([textView.selectedRange])
+            // guard let onSelectionChange = parent.onSelectionChange,
+            //       !updatingUIView
+            // else { return }
+            // selectedTextRange = textView.selectedRange
+            // onSelectionChange([textView.selectedRange])
             parent.position = textView.selectedRange.location
         }
 
