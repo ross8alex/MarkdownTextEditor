@@ -14,6 +14,7 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     public var model: HighlightedTextModel
+    var onTextViewCreated: ((UITextView) -> Void)? = nil
     
     public struct Internals {
         public let textView: SystemTextView
@@ -46,6 +47,9 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         updateTextViewModifiers(textView)
         runIntrospect(textView)
         context.coordinator.textView = textView
+        DispatchQueue.main.async {
+            self.onTextViewCreated?(textView)
+        }
         
         return textView
     }
@@ -99,22 +103,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         // Modifiers and introspection
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
-    }
-
-    private func insertBold() {
-        guard let tv = textView,
-              let range = tv.selectedTextRange else { return }
-
-        // Insert the two asterisks
-        tv.replace(range, withText: "**")
-
-        // Move cursor back between them
-        if let newPos = tv.position(from: range.start, offset: 1) {
-            tv.selectedTextRange = tv.textRange(from: newPos, to: newPos)
-        }
-
-        // Sync text back into SwiftUI state
-        model.text = tv.text
     }
 
     private func runIntrospect(_ textView: UITextView) {
