@@ -13,7 +13,7 @@ import UIKit
 @available(iOS 17.0, *)
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
-    public var model: HighlightedTextModel
+    @Binding public var model: HighlightedTextModel
     var onTextViewCreated: ((UITextView) -> Void)? = nil
     
     public struct Internals {
@@ -30,11 +30,11 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     private(set) var introspect: IntrospectObservableCallback?
 
     public init(
-        model: HighlightedTextModel,
+        model: Binding<HighlightedTextModel>,
         highlightRules: [HighlightRule], 
         onTextViewCreated: ((UITextView) -> Void)? = nil
     ) {
-        self.model = model
+        self._model = model
         self.highlightRules = highlightRules
         self.onTextViewCreated = onTextViewCreated
     }
