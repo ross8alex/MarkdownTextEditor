@@ -139,6 +139,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             guard textView.markedTextRange == nil else { return }
 
             parent.model.text = textView.text
+            parent.text = textView.text
             parent.model.characters = textView.text.count
             selectedTextRange = textView.selectedRange
         }
