@@ -13,7 +13,8 @@ import UIKit
 @available(iOS 17.0, *)
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
-    @Binding public var model: HighlightedTextModel
+    public var model: HighlightedTextModel
+    @Binding public var text: String
     var onTextViewCreated: ((UITextView) -> Void)? = nil
     
     public struct Internals {
@@ -30,11 +31,13 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     private(set) var introspect: IntrospectObservableCallback?
 
     public init(
-        model: Binding<HighlightedTextModel>,
+        model: HighlightedTextModel,
+        text: Binding<String>,
         highlightRules: [HighlightRule], 
         onTextViewCreated: ((UITextView) -> Void)? = nil
     ) {
-        self._model = model
+        self.model = model
+        self._text = text
         self.highlightRules = highlightRules
         self.onTextViewCreated = onTextViewCreated
     }
@@ -69,7 +72,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         if let markedRange = uiView.markedTextRange, !markedRange.isEmpty {
             // Partial highlight which causes duplication
             // let partiallyHighlighted = HighlightedTextEditor
-            //      .getHighlightedText(text: model.text, highlightRules: highlightRules)
+            //      .getHighlightedText(text: text, highlightRules: highlightRules)
             // let markedNSRange = uiView.nsRange(from: markedRange)
             //
             // uiView.setAttributedMarkedText(partiallyHighlighted, selectedRange: markedNSRange)
@@ -80,7 +83,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
         // No marked text. Build the fully highlighted text.
         let highlightedText = HighlightedTextEditor.getHighlightedText(
-            text: model.text,
+            text: text,
             highlightRules: highlightRules
         )
 
