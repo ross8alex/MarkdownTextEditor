@@ -14,7 +14,6 @@ import UIKit
 public struct HighlightedTextEditorObservable: UIViewRepresentable, HighlightingTextEditorObservable {
     
     public var model: HighlightedTextModel
-    @Binding public var text: String
     var onTextViewCreated: ((UITextView) -> Void)? = nil
     
     public struct Internals {
@@ -32,12 +31,10 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
     public init(
         model: HighlightedTextModel,
-        text: Binding<String>,
         highlightRules: [HighlightRule], 
         onTextViewCreated: ((UITextView) -> Void)? = nil
     ) {
         self.model = model
-        self._text = text
         self.highlightRules = highlightRules
         self.onTextViewCreated = onTextViewCreated
     }
@@ -72,7 +69,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         if let markedRange = uiView.markedTextRange, !markedRange.isEmpty {
             // Partial highlight which causes duplication
             // let partiallyHighlighted = HighlightedTextEditor
-            //      .getHighlightedText(text: text, highlightRules: highlightRules)
+            //      .getHighlightedText(text: model.text, highlightRules: highlightRules)
             // let markedNSRange = uiView.nsRange(from: markedRange)
             //
             // uiView.setAttributedMarkedText(partiallyHighlighted, selectedRange: markedNSRange)
@@ -83,7 +80,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
 
         // No marked text. Build the fully highlighted text.
         let highlightedText = HighlightedTextEditor.getHighlightedText(
-            text: text,
+            text: model.text,
             highlightRules: highlightRules
         )
 
@@ -139,7 +136,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             guard textView.markedTextRange == nil else { return }
 
             parent.model.text = textView.text
-            parent.text = textView.text
             parent.model.characters = textView.text.count
             selectedTextRange = textView.selectedRange
         }
