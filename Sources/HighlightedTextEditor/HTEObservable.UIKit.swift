@@ -194,11 +194,13 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     
             let insertion = "\n" + prefix
             textView.textStorage.replaceCharacters(in: range, with: insertion)
-    
-            // // 🔑 Correct cursor placement: after the full insertion
-            // let newCursor = range.location + insertion.count
-            // textView.selectedRange = NSRange(location: newCursor, length: 0)
-    
+
+            // 🔑 Correct cursor placement: after the full insertion
+            DispatchQueue.main.async {
+                let newCursor = range.location + insertion.count
+                textView.selectedRange = NSRange(location: newCursor, length: 0)
+            }
+            
             // Keep binding in sync
             parent.model.text = textView.text
         }
