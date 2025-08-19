@@ -22,6 +22,8 @@ public final class HighlightedTextModel {
 
     /// The text stored in this modal and displayed in the ``HighligtedTextEditor``.
     public var text: String
+
+    public var listMode: ListMode = .none
     
     /// The number of characters in ``text``.
     ///
@@ -50,4 +52,10 @@ public final class HighlightedTextModel {
         self.characters = text.count
     }
     
+}
+
+enum ListMode {
+    case none
+    case bullet
+    case numbered
 }
