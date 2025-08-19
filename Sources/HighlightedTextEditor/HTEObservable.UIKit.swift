@@ -126,7 +126,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         var updatingUIView = false
         var lastAssignedText: NSAttributedString? = nil
         var textView: UITextView?
-        var listMode: ListMode = .none
 
         init(_ markdownEditorView: HighlightedTextEditorObservable) {
             self.parent = markdownEditorView
@@ -176,7 +175,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             let currentLine = nsText.substring(with: lineRange)
     
             var prefix = ""
-            switch listMode {
+            switch parent.model.listMode {
             case .bullet:
                 prefix = "* "
             case .numbered:
@@ -202,35 +201,6 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
     
             // Keep binding in sync
             parent.model.text = textView.text
-        }
-    
-        // 🔑 Toggle list modes externally (from SwiftUI buttons)
-        func toggleBulletList(_ textView: UITextView) {
-            if listMode == .bullet {
-                listMode = .none
-            } else {
-                listMode = .bullet
-                if !textView.text.hasSuffix("\n") {
-                    textView.text.append("\n")
-                }
-                textView.text.append("* ")
-                textView.selectedRange = NSRange(location: textView.text.count, length: 0)
-                parent.model.text = textView.text
-            }
-        }
-    
-        func toggleNumberedList(_ textView: UITextView) {
-            if listMode == .numbered {
-                listMode = .none
-            } else {
-                listMode = .numbered
-                if !textView.text.hasSuffix("\n") {
-                    textView.text.append("\n")
-                }
-                textView.text.append("1. ")
-                textView.selectedRange = NSRange(location: textView.text.count, length: 0)
-                parent.model.text = textView.text
-            }
         }
     }
     
