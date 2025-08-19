@@ -157,7 +157,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             parent.onCommit?()
         }
 
-        func textView(_ textView: UITextView,
+        public func textView(_ textView: UITextView,
                   shouldChangeTextIn range: NSRange,
                   replacementText text: String) -> Bool {
             if text == "\n" {
@@ -201,7 +201,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
             textView.selectedRange = NSRange(location: cursorLocation, length: 0)
     
             // Keep binding in sync
-            parent.text = textView.text
+            parent.model.text = textView.text
         }
     
         // 🔑 Toggle list modes externally (from SwiftUI buttons)
@@ -215,7 +215,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
                 }
                 textView.text.append("* ")
                 textView.selectedRange = NSRange(location: textView.text.count, length: 0)
-                parent.text = textView.text
+                parent.model.text = textView.text
             }
         }
     
@@ -229,7 +229,7 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
                 }
                 textView.text.append("1. ")
                 textView.selectedRange = NSRange(location: textView.text.count, length: 0)
-                parent.text = textView.text
+                parent.model.text = textView.text
             }
         }
     }
