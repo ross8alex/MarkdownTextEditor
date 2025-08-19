@@ -51,11 +51,10 @@ public final class HighlightedTextModel {
         self.text = text
         self.characters = text.count
     }
-    
-}
 
-enum ListMode {
-    case none
-    case bullet
-    case numbered
+    enum ListMode {
+        case none
+        case bullet
+        case numbered
+    }
 }
