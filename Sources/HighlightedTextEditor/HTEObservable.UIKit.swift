@@ -119,6 +119,53 @@ public struct HighlightedTextEditorObservable: UIViewRepresentable, Highlighting
         textInputTraits?.setValue(textView.tintColor, forKey: "insertionPointColor")
     }
 
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            handleNewLine(in: textView, range: range)
+            return false // prevent default newline behavior
+        }
+        return true
+    }
+
+    func handleNewLine(in textView: UITextView, range: NSRange) {
+        guard let textRange = Range(range, in: textView.text) else { return }
+        
+        // Find the current line
+        let fullText = textView.text as NSString
+        let lineRange = fullText.lineRange(for: range)
+        let currentLine = fullText.substring(with: lineRange)
+        
+        var prefix = ""
+        
+        switch model.listMode {
+        case .bullet:
+            prefix = "* "
+            
+        case .numbered:
+            // Try to detect current number by parsing the line
+            if let match = currentLine.prefix(while: { $0.isNumber || $0 == "." }).split(separator: ".").first,
+               let currentNumber = Int(match) {
+                prefix = "\(currentNumber + 1). "
+            } else {
+                prefix = "1. " // fallback
+            }
+            
+        case .none:
+            prefix = ""
+        }
+        
+        // Insert newline + prefix
+        let insertion = "\n" + prefix
+        textView.textStorage.replaceCharacters(in: range, with: insertion)
+        
+        // Move cursor after prefix
+        let cursorLocation = range.location + insertion.count
+        textView.selectedRange = NSRange(location: cursorLocation, length: 0)
+        
+        // Trigger binding sync if you’re using @Binding
+        model.text = textView.text
+    }
+
     public final class Coordinator: NSObject, UITextViewDelegate {
         
         var parent: HighlightedTextEditorObservable
